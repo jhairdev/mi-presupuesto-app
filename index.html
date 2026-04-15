@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Presupuesto</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --border: #e5e7eb;
+      --shadow: 0 10px 25px rgba(0,0,0,0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .header {
+      margin-bottom: 16px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 8px 0 4px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0 0 12px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .grid-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      outline: none;
+      background: white;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+      flex: 1;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: var(--text);
+      flex: 1;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat {
+      padding: 14px;
+      border-radius: 16px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+    }
+
+    .stat span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat strong {
+      font-size: 20px;
+    }
+
+    .stat.full {
+      grid-column: 1 / -1;
+    }
+
+    .good { color: var(--success); }
+    .bad { color: var(--danger); }
+    .warn { color: var(--warning); }
+
+    .progress-wrap {
+      margin-top: 12px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 14px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--primary);
+      transition: width .25s ease;
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      background: #fff;
+    }
+
+    .item-main {
+      min-width: 0;
+    }
+
+    .item-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+      word-break: break-word;
+    }
+
+    .item-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .item-amount {
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 18px 8px;
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 20px 0 6px;
+    }
+
+    @media (max-width: 420px) {
+      .grid-2, .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="header">
+      <h1 class="title">Mi Presupuesto</h1>
+      <p class="subtitle">Controla tus ingresos, gastos y ahorro mensual desde tu dispositivo.</p>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Configuración mensual</h2>
+      <div class="grid grid-2">
+        <div>
+          <label for="salario">Sueldo mensual</label>
+          <input type="number" id="salario" placeholder="Ej. 850" min="0" step="0.01" />
+        </div>
+        <div>
+          <label for="metaAhorro">Meta de ahorro</label>
+          <input type="number" id="metaAhorro" placeholder="Ej. 150" min="0" step="0.01" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="guardarConfiguracion()">Guardar configuración</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Registrar gasto</h2>
+      <div class="grid">
+        <div>
+          <label for="descripcion">Descripción</label>
+          <input type="text" id="descripcion" placeholder="Ej. Supermercado" />
+        </div>
+        <div class="grid grid-2">
+          <div>
+            <label for="categoria">Categoría</label>
+            <select id="categoria">
+              <option value="Alimentación">Alimentación</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Salud">Salud</option>
+              <option value="Educación">Educación</option>
+              <option value="Entretenimiento">Entretenimiento</option>
+              <option value="Deudas">Deudas</option>
+              <option value="Otros">Otros</option>
+            </select>
+          </div>
+          <div>
+            <label for="monto">Monto</label>
+            <input type="number" id="monto" placeholder="Ej. 25.50" min="0" step="0.01" />
+          </div>
+        </div>
+        <div>
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" />
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-primary" onclick="agregarGasto()">Agregar gasto</button>
+        <button class="btn-secondary" onclick="limpiarFormulario()">Limpiar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Resumen del mes</h2>
+      <div class="stats">
+        <div class="stat">
+          <span>Ingreso</span>
+          <strong id="viewIngreso">$0.00</strong>
+        </div>
+        <div class="stat">
+          <span>Gasto total</span>
+          <strong id="viewGasto">$0.00</strong>
+        </div>
+        <div class="stat">
+          <span>Saldo disponible</span>
+          <strong id="viewSaldo">$0.00</strong>
+        </div>
+        <div class="stat">
+          <span>Ahorro estimado</span>
+          <strong id="viewAhorro">$0.00</strong>
+        </div>
+        <div class="stat full">
+          <span>Estado</span>
+          <strong id="viewEstado">Sin datos suficientes</strong>
+          <div class="progress-wrap">
+            <div class="progress">
+              <div class="progress-bar" id="barraProgreso"></div>
+            </div>
+            <div class="small" id="textoProgreso">0% de tu sueldo comprometido en gastos.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Historial de gastos</h2>
+      <div id="listaGastos" class="list"></div>
+      <div class="btn-row">
+        <button class="btn-danger" onclick="borrarTodo()">Borrar todos los datos</button>
+      </div>
+    </div>
+
+    <p class="footer-note">Los datos se guardan localmente en este dispositivo.</p>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'mi_presupuesto_app_v1';
+
+    let state = {
+      salario: 0,
+      metaAhorro: 0,
+      gastos: []
+    };
+
+    function formatoMoneda(valor) {
+      const numero = Number(valor || 0);
+      return numero.toLocaleString('es-EC', {
+        style: 'currency',
+        currency: 'USD'
+      });
+    }
+
+    function hoyISO() {
+      const hoy = new Date();
+      const y = hoy.getFullYear();
+      const m = String(hoy.getMonth() + 1).padStart(2, '0');
+      const d = String(hoy.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function guardarEnLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function cargarDesdeLocal() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          state = {
+            salario: Number(parsed.salario || 0),
+            metaAhorro: Number(parsed.metaAhorro || 0),
+            gastos: Array.isArray(parsed.gastos) ? parsed.gastos : []
+          };
+        } catch (e) {
+          console.error('Error leyendo datos locales', e);
+        }
+      }
+    }
+
+    function guardarConfiguracion() {
+      const salario = parseFloat(document.getElementById('salario').value) || 0;
+      const metaAhorro = parseFloat(document.getElementById('metaAhorro').value) || 0;
+
+      state.salario = salario;
+      state.metaAhorro = metaAhorro;
+      guardarEnLocal();
+      render();
+      alert('Configuración guardada correctamente.');
+    }
+
+    function agregarGasto() {
+      const descripcion = document.getElementById('descripcion').value.trim();
+      const categoria = document.getElementById('categoria').value;
+      const monto = parseFloat(document.getElementById('monto').value);
+      const fecha = document.getElementById('fecha').value;
+
+      if (!descripcion) {
+        alert('Ingresa una descripción.');
+        return;
+      }
+
+      if (!monto || monto <= 0) {
+        alert('Ingresa un monto válido.');
+        return;
+      }
+
+      if (!fecha) {
+        alert('Selecciona una fecha.');
+        return;
+      }
+
+      state.gastos.unshift({
+        id: Date.now(),
+        descripcion,
+        categoria,
+        monto,
+        fecha
+      });
+
+      guardarEnLocal();
+      limpiarFormulario();
+      render();
+    }
+
+    function limpiarFormulario() {
+      document.getElementById('descripcion').value = '';
+      document.getElementById('monto').value = '';
+      document.getElementById('fecha').value = hoyISO();
+      document.getElementById('categoria').value = 'Alimentación';
+    }
+
+    function eliminarGasto(id) {
+      state.gastos = state.gastos.filter(g => g.id !== id);
+      guardarEnLocal();
+      render();
+    }
+
+    function borrarTodo() {
+      const confirmar = confirm('Se eliminarán todos los datos guardados en este dispositivo.');
+      if (!confirmar) return;
+
+      state = {
+        salario: 0,
+        metaAhorro: 0,
+        gastos: []
+      };
+
+      guardarEnLocal();
+      render();
+      limpiarFormulario();
+    }
+
+    function calcularResumen() {
+      const ingreso = Number(state.salario || 0);
+      const gastoTotal = state.gastos.reduce((acc, g) => acc + Number(g.monto || 0), 0);
+      const saldo = ingreso - gastoTotal;
+      const ahorro = saldo;
+      const progreso = ingreso > 0 ? Math.min((gastoTotal / ingreso) * 100, 100) : 0;
+
+      let estado = 'Sin datos suficientes';
+      let clase = '';
+
+      if (ingreso > 0) {
+        if (saldo < 0) {
+          estado = 'Has gastado más de tu ingreso mensual';
+          clase = 'bad';
+        } else if (ahorro >= Number(state.metaAhorro || 0) && Number(state.metaAhorro || 0) > 0) {
+          estado = 'Vas cumpliendo tu meta de ahorro';
+          clase = 'good';
+        } else if (progreso >= 85) {
+          estado = 'Tu nivel de gasto está alto';
+          clase = 'warn';
+        } else {
+          estado = 'Tu presupuesto va estable';
+          clase = 'good';
+        }
+      }
+
+      return { ingreso, gastoTotal, saldo, ahorro, progreso, estado, clase };
+    }
+
+    function render() {
+      document.getElementById('salario').value = state.salario || '';
+      document.getElementById('metaAhorro').value = state.metaAhorro || '';
+
+      const resumen = calcularResumen();
+
+      document.getElementById('viewIngreso').textContent = formatoMoneda(resumen.ingreso);
+      document.getElementById('viewGasto').textContent = formatoMoneda(resumen.gastoTotal);
+      document.getElementById('viewSaldo').textContent = formatoMoneda(resumen.saldo);
+      document.getElementById('viewAhorro').textContent = formatoMoneda(resumen.ahorro);
+
+      const estadoEl = document.getElementById('viewEstado');
+      estadoEl.textContent = resumen.estado;
+      estadoEl.className = resumen.clase;
+
+      document.getElementById('barraProgreso').style.width = `${resumen.progreso}%`;
+      document.getElementById('textoProgreso').textContent = `${resumen.progreso.toFixed(1)}% de tu sueldo comprometido en gastos.`;
+
+      const lista = document.getElementById('listaGastos');
+      lista.innerHTML = '';
+
+      if (!state.gastos.length) {
+        lista.innerHTML = '<div class="empty">Aún no has registrado gastos.</div>';
+        return;
+      }
+
+      state.gastos.forEach(gasto => {
+        const item = document.createElement('div');
+        item.className = 'item';
+        item.innerHTML = `
+          <div class="item-main">
+            <div class="item-title">${escapeHtml(gasto.descripcion)}</div>
+            <div class="item-sub">${escapeHtml(gasto.categoria)} · ${escapeHtml(gasto.fecha)}</div>
+          </div>
+          <div>
+            <div class="item-amount">${formatoMoneda(gasto.monto)}</div>
+            <div style="margin-top:8px; text-align:right;">
+              <button class="btn-danger" style="padding:8px 10px; font-size:12px;" onclick="eliminarGasto(${gasto.id})">Eliminar</button>
+            </div>
+          </div>
+        `;
+        lista.appendChild(item);
+      });
+    }
+
+    function escapeHtml(texto) {
+      return String(texto)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function init() {
+      cargarDesdeLocal();
+      document.getElementById('fecha').value = hoyISO();
+      render();
+    }
+
+    init();
+  </script>
+</body>
+</html>
